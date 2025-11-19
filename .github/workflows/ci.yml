@@ -20,13 +20,17 @@ jobs:
           --health-cmd "pg_isready -U postgres -d graphql_test"
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 5
+          --health-retries 10
 
     env:
       RAILS_ENV: test
       PG_USERNAME: postgres
       PG_PASSWORD: secret
+<<<<<<< HEAD
       PG_HOST: postgres   # must match service name
+=======
+      PG_HOST: postgres    # must match the service name
+>>>>>>> cf249246bcebde41a7126ab5125c94585e231dd2
       PG_PORT: 5432
       DATABASE_URL: "postgres://postgres:secret@postgres:5432/graphql_test"
 
@@ -43,27 +47,30 @@ jobs:
       - name: Install dependencies
         run: bundle install --jobs 4 --retry 3
 
-      - name: Wait for Postgres to be ready
+      - name: Install Postgres client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Wait for Postgres
         run: |
-            echo "Waiting for Postgres..."
-            for i in {1..30}; do
-              if pg_isready -h $PG_HOST -p $PG_PORT -U $PG_USERNAME; then
-                echo "Postgres is ready!"
-                exit 0
-              fi
-              echo "Postgres not ready yet, sleeping 2 seconds..."
-              sleep 2
-            done
-            echo "Postgres failed to start in time"
-            exit 1
-          
+          echo "Waiting for Postgres to be ready..."
+          for i in {1..30}; do
+            if pg_isready -h $PG_HOST -p $PG_PORT -U $PG_USERNAME; then
+              echo "Postgres is ready!"
+              exit 0
+            fi
+            echo "Postgres not ready yet, sleeping 2 seconds..."
+            sleep 2
+          done
+          echo "Postgres failed to start in time"
+          exit 1
+
       - name: Setup database
         run: |
           bin/rails db:create
           bin/rails db:schema:load
 
       - name: Run RSpec tests
-        run: bundle exec rspec spec/graphql/queries/user_spec.rb
+        run: bundle exec rspec spec/graphql/queries/
 
   lint:
     runs-on: ubuntu-latest
@@ -75,7 +82,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.2
+          ruby-version: 3.1.4
           bundler-cache: true
 
       - name: Install dependencies
