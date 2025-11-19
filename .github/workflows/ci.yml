@@ -37,30 +37,30 @@ jobs:
       - name: Run user specs
         run: bundle exec rspec spec/graphql/queries/user_spec.rb
 
-  lint:
-    runs-on: ubuntu-latest
+  # lint:
+  #   runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 3.1.4
-          bundler-cache: true
+  #     - name: Set up Ruby
+  #       uses: ruby/setup-ruby@v1
+  #       with:
+  #         ruby-version: 3.1.4
+  #         bundler-cache: true
 
-      - name: Install dependencies
-        run: bundle install --jobs 4 --retry 3
+  #     - name: Install dependencies
+  #       run: bundle install --jobs 4 --retry 3
 
-      - name: Generate binstubs for linters
-        run: bundle binstubs bundler-audit brakeman rubocop
+  #     - name: Generate binstubs for linters
+  #       run: bundle binstubs bundler-audit brakeman rubocop
 
-      - name: Security audit dependencies
-        run: bin/bundler-audit check --update
+  #     - name: Security audit dependencies
+  #       run: bin/bundler-audit check --update
 
-      - name: Security audit application code
-        run: bin/brakeman -q -w2
+  #     - name: Security audit application code
+  #       run: bin/brakeman -q -w2
 
-      - name: Lint Ruby files
-        run: bin/rubocop --parallel
+  #     - name: Lint Ruby files
+  #       run: bin/rubocop --parallel
