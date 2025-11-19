@@ -11,22 +11,9 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_DB: graphql_test
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: secret
-        options: >-
-          --health-cmd "pg_isready -U postgres -d graphql_test"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 10
     env:
       RAILS_ENV: test
-      PG_USERNAME: postgres
-      PG_PASSWORD: secret
+      BUNDLE_WITH: test
 
     steps:
       - name: Checkout
@@ -38,33 +25,11 @@ jobs:
           ruby-version: 3.1.4
           bundler-cache: true
 
-      - name: Install dependencies
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y sqlite3 libsqlite3-dev
+
+      - name: Install gems
         run: bundle install --jobs 4 --retry 3
-
-      - name: Configure database connection env
-        run: |
-          echo "PG_HOST=127.0.0.1" >> "$GITHUB_ENV"
-          echo "PG_PORT=${{ job.services.postgres.ports[5432] }}" >> "$GITHUB_ENV"
-          echo "DATABASE_URL=postgres://postgres:secret@127.0.0.1:${{ job.services.postgres.ports[5432] }}/graphql_test" >> "$GITHUB_ENV"
-
-      - name: Install PostgreSQL client
-        run: sudo apt-get update && sudo apt-get install -y postgresql-client
-
-      - name: Wait for Postgres to be ready
-        env:
-          PGPASSWORD: ${{ env.PG_PASSWORD }}
-        run: |
-          echo "Waiting for Postgres..."
-          for i in {1..40}; do
-            if pg_isready -h "$PG_HOST" -p "$PG_PORT" -U "$PG_USERNAME" -d graphql_test; then
-              echo "Postgres is ready!"
-              exit 0
-            fi
-            echo "Postgres not ready yet, sleeping 3 seconds..."
-            sleep 3
-          done
-          echo "Postgres failed to start in time"
-          exit 1
 
       - name: Prepare database
         run: bin/rails db:prepare

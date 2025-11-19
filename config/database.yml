@@ -1,24 +1,16 @@
-# PostgreSQL. Versions 9.3 and up are supported.
-
 default: &default
-  adapter: postgresql
-  encoding: unicode
+  adapter: sqlite3
   pool: <%= ENV.fetch("RAILS_MAX_THREADS", 5) %>
-  username: <%= ENV.fetch("PG_USERNAME", "postgres") %>
-  password: <%= ENV.fetch("PG_PASSWORD", "secret") %>
-  host: <%= ENV.fetch("PG_HOST", "localhost") %>
-  port: <%= ENV.fetch("PG_PORT", 5432) %>
+  timeout: 5000
 
 development:
   <<: *default
-  database: graphql_development
+  database: db/development.sqlite3
 
 test:
   <<: *default
-  database: graphql_test
+  database: db/test.sqlite3
 
 production:
   <<: *default
-  database: graphql_production
-  username: <%= ENV.fetch("GRAPHQL_DATABASE_USER", "graphql") %>
-  password: <%= ENV["GRAPHQL_DATABASE_PASSWORD"] %>
+  database: db/production.sqlite3
