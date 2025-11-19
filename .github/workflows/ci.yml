@@ -43,13 +43,20 @@ jobs:
       - name: Install dependencies
         run: bundle install --jobs 4 --retry 3
 
-      - name: Wait for Postgres
+      - name: Wait for Postgres to be ready
         run: |
-          until pg_isready -h $PG_HOST -p $PG_PORT -U $PG_USERNAME; do
             echo "Waiting for Postgres..."
-            sleep 1
-          done
-
+            for i in {1..30}; do
+              if pg_isready -h $PG_HOST -p $PG_PORT -U $PG_USERNAME; then
+                echo "Postgres is ready!"
+                exit 0
+              fi
+              echo "Postgres not ready yet, sleeping 2 seconds..."
+              sleep 2
+            done
+            echo "Postgres failed to start in time"
+            exit 1
+          
       - name: Setup database
         run: |
           bin/rails db:create
