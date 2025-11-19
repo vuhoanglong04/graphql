@@ -1,0 +1,85 @@
+name: Ruby on Rails CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        ports:
+          - 6000:5432
+        env:
+          POSTGRES_DB: graphql_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: secret
+        options: >-
+          --health-cmd "pg_isready -U rails -d rails_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      RAILS_ENV: test
+      DATABASE_URL: "postgres://postgres:secret@localhost:6000/graphql_test"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.2 # change to your Ruby version
+          bundler-cache: true
+
+      - name: Install dependencies
+        run: bundle install --jobs 4 --retry 3
+
+      - name: Wait for Postgres
+        run: |
+          until pg_isready -h localhost -p 5432 -U rails; do
+            echo "Waiting for Postgres..."
+            sleep 1
+          done
+
+      - name: Setup database
+        run: |
+          bin/rails db:create
+          bin/rails db:schema:load
+          bin/rails db:test:prepare
+
+      - name: Run RSpec tests
+        run: bundle exec rspec spec/graphql/queries/user_spec.rb
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.2
+          bundler-cache: true
+
+      - name: Install dependencies
+        run: bundle install --jobs 4 --retry 3
+
+      - name: Generate binstubs for linters
+        run: bundle binstubs bundler-audit brakeman rubocop
+
+      - name: Security audit dependencies
+        run: bin/bundler-audit check --update
+
+      - name: Security audit application code
+        run: bin/brakeman -q -w2
+
+      - name: Lint Ruby files
+        run: bin/rubocop --parallel
