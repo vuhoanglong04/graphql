@@ -27,9 +27,9 @@ jobs:
       RAILS_ENV: test
       PG_USERNAME: postgres
       PG_PASSWORD: secret
-      PG_HOST: postgres
-      PG_PORT: 5432
-      DATABASE_URL: "postgres://postgres:secret@postgres:5432/graphql_test"
+      PG_HOST: 127.0.0.1
+      PG_PORT: ${{ job.services.postgres.ports[5432] }}
+      DATABASE_URL: postgres://postgres:secret@127.0.0.1:${{ job.services.postgres.ports[5432] }}/graphql_test
 
     steps:
       - name: Checkout
