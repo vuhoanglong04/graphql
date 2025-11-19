@@ -75,4 +75,6 @@ gem "graphiql-rails", group: :development
 gem 'bcrypt'
 gem 'faker'
 gem 'kaminari'
+gem 'rspec-rails'
+gem 'factory_bot_rails'
 
