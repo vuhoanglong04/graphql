@@ -27,9 +27,6 @@ jobs:
       RAILS_ENV: test
       PG_USERNAME: postgres
       PG_PASSWORD: secret
-      PG_HOST: 127.0.0.1
-      PG_PORT: ${{ job.services.postgres.ports[5432] }}
-      DATABASE_URL: postgres://postgres:secret@127.0.0.1:${{ job.services.postgres.ports[5432] }}/graphql_test
 
     steps:
       - name: Checkout
@@ -43,6 +40,12 @@ jobs:
 
       - name: Install dependencies
         run: bundle install --jobs 4 --retry 3
+
+      - name: Configure database connection env
+        run: |
+          echo "PG_HOST=127.0.0.1" >> "$GITHUB_ENV"
+          echo "PG_PORT=${{ job.services.postgres.ports[5432] }}" >> "$GITHUB_ENV"
+          echo "DATABASE_URL=postgres://postgres:secret@127.0.0.1:${{ job.services.postgres.ports[5432] }}/graphql_test" >> "$GITHUB_ENV"
 
       - name: Install PostgreSQL client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
