@@ -21,13 +21,9 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 10
-          
+
     env:
       RAILS_ENV: test
-      PG_USERNAME: postgres
-      PG_PASSWORD: secret
-      PG_HOST: postgres
-      PG_PORT: 5432
       DATABASE_URL: "postgres://postgres:secret@postgres:5432/graphql_test"
 
     steps:
@@ -45,10 +41,9 @@ jobs:
 
       - name: Setup database
         run: |
-          bin/rails db:create
-          bin/rails db:schema:load
+          bin/rails db:create db:schema:load
 
-      - name: Run RSpec tests
+      - name: Run tests
         run: bundle exec rspec spec/graphql/queries/
 
   lint:
@@ -67,14 +62,9 @@ jobs:
       - name: Install dependencies
         run: bundle install --jobs 4 --retry 3
 
-      - name: Generate binstubs for linters
-        run: bundle binstubs bundler-audit brakeman rubocop
-
-      - name: Security audit dependencies
-        run: bin/bundler-audit check --update
-
-      - name: Security audit application code
-        run: bin/brakeman -q -w2
-
-      - name: Lint Ruby files
-        run: bin/rubocop --parallel
+      - name: Run linters
+        run: |
+          bundle binstubs bundler-audit brakeman rubocop
+          bin/bundler-audit check --update
+          bin/brakeman -q -w2
+          bin/rubocop --parallel
