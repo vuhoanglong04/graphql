@@ -15,9 +15,12 @@ jobs:
         ports:
           - 6000:5432
         env:
-          POSTGRES_DB: graphql_test
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: secret
+            RAILS_ENV: test
+            PG_USERNAME: postgres
+            PG_PASSWORD: secret
+            PG_HOST: postgres        # <- must match the service name
+            PG_PORT: 5432
+            DATABASE_URL: "postgres://postgres:secret@postgres:5432/graphql_test"
         options: >-
           --health-cmd "pg_isready -U rails -d rails_test"
           --health-interval 10s
