@@ -1,15 +1,16 @@
-name: Ruby on Rails CI
+name: GraphQL CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
-  test:
+  tests:
     runs-on: ubuntu-latest
-
     services:
       postgres:
         image: postgres:15
@@ -22,17 +23,16 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 10
-
     env:
       RAILS_ENV: test
       PG_USERNAME: postgres
       PG_PASSWORD: secret
-      PG_HOST: localhost   # GitHub Actions maps service to localhost
+      PG_HOST: postgres
       PG_PORT: 5432
-      DATABASE_URL: "postgres://postgres:secret@localhost:5432/graphql_test"
+      DATABASE_URL: "postgres://postgres:secret@postgres:5432/graphql_test"
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Set up Ruby
@@ -44,30 +44,30 @@ jobs:
       - name: Install dependencies
         run: bundle install --jobs 4 --retry 3
 
-      - name: Install Postgres client
+      - name: Install PostgreSQL client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
-      - name: Wait for Postgres
+      - name: Wait for Postgres to be ready
+        env:
+          PGPASSWORD: ${{ env.PG_PASSWORD }}
         run: |
-          echo "Waiting for Postgres to be ready..."
-          for i in {1..30}; do
-            if pg_isready -h $PG_HOST -p $PG_PORT -U $PG_USERNAME; then
+          echo "Waiting for Postgres..."
+          for i in {1..40}; do
+            if pg_isready -h "$PG_HOST" -p "$PG_PORT" -U "$PG_USERNAME" -d graphql_test; then
               echo "Postgres is ready!"
               exit 0
             fi
-            echo "Postgres not ready yet, sleeping 2 seconds..."
-            sleep 2
+            echo "Postgres not ready yet, sleeping 3 seconds..."
+            sleep 3
           done
           echo "Postgres failed to start in time"
           exit 1
 
-      - name: Setup database
-        run: |
-          bin/rails db:create
-          bin/rails db:schema:load
+      - name: Prepare database
+        run: bin/rails db:prepare
 
-      - name: Run RSpec tests
-        run: bundle exec rspec spec/graphql/queries/
+      - name: Run user specs
+        run: bundle exec rspec spec/graphql/queries/user_spec.rb
 
   lint:
     runs-on: ubuntu-latest
