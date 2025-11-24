@@ -12,4 +12,4 @@ require 'faker'
 end
 
 puts 'Seeded 5 users!'
-puts 'Test'
+puts 'Test 2'
