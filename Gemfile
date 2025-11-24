@@ -79,7 +79,8 @@ end
 gem 'bcrypt'
 gem 'factory_bot_rails'
 gem 'faker'
-gem 'graphiql-rails', group: :development
+gem 'graphiql-rails'
 gem 'graphql'
 gem 'kaminari'
 gem 'rspec-rails'
+gem 'dotenv-rails'

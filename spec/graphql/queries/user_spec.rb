@@ -33,30 +33,4 @@ RSpec.describe 'GraphQL Query', type: :request do
       expect(data[:age]).to eq(user.age)
     end
   end
-
-  # describe "query: users" do
-  #   let(:query) do
-  #     <<~GQL
-  #       query {
-  #         users {
-  #           id
-  #           name
-  #           email
-  #           age
-  #         }
-  #       }
-  #     GQL
-  #   end
-  #   it "returns users data" do
-  #     users = create_list(:user, 3)
-  #
-  #     result = execute_graphql(
-  #       query: query
-  #     )
-  #
-  #     data = result[:data][:users][:items]
-  #     expect(data.size).to eq(3)
-  #   end
-  #
-  # end
 end
