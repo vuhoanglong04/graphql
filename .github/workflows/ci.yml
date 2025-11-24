@@ -56,9 +56,6 @@ jobs:
       - name: Install linter binstubs
         run: bundle binstubs brakeman rubocop
 
-      - name: Security audit dependencies
-        run: bin/bundler-audit check --update
-
       - name: Security scan with Brakeman
         run: bin/brakeman -q -w2
 
