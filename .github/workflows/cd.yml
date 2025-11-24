@@ -25,23 +25,23 @@ jobs:
             -t ${{ secrets.DOCKER_USERNAME }}/demo-cicd:latest .
 
       - name: Push Docker image
-        run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/demo-cicd:latest
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/demo-cicd:latest
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted   # ✅ your PC becomes deployment machine
     needs: build-and-push
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v0.1.7
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script: |
-            docker pull ${{ secrets.DOCKER_USERNAME }}/demo-cicd:latest
-            docker stop demo-cicd || true
-            docker rm demo-cicd || true
-            docker run -d --name demo-cicd -p 3001:3001 \
-              --env-file /home/${{ secrets.SERVER_USER }}/.env \
-              ${{ secrets.DOCKER_USERNAME }}/demo-cicd:latest
+      - name: Pull latest image
+        run: docker pull ${{ secrets.DOCKER_USERNAME }}/demo-cicd:latest
+
+      - name: Stop old container
+        run: docker stop demo-cicd || true
+
+      - name: Remove old container
+        run: docker rm demo-cicd || true
+
+      - name: Run new container
+        run: |
+          docker run -d --name demo-cicd -p 3001:3001 \
+          --env-file /home/longvlh/.env \
+          ${{ secrets.DOCKER_USERNAME }}/demo-cicd:latest
