@@ -20,7 +20,9 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/demo-cicd:latest .
+          docker build \
+            --build-arg SECRET_KEY_BASE=${{ secrets.SECRET_KEY_BASE }} \
+            -t ${{ secrets.DOCKER_USERNAME }}/demo-cicd:latest .
 
       - name: Push Docker image
         run: |
