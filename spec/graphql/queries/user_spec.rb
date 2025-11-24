@@ -8,7 +8,7 @@ RSpec.describe 'GraphQL Query', type: :request do
 
     let(:query) do
       <<~GQL
-        query {
+        query($id: ID!) {
           user(id: $id) {
             id
             name

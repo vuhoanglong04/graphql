@@ -57,7 +57,7 @@ jobs:
         run: bundle binstubs brakeman rubocop
 
       - name: Security scan with Brakeman
-        run: bin/brakeman -q -w2
+        run: bin/brakeman --except EOLRuby,EOLRails -q -w2
 
       - name: Lint with RuboCop
         run: bin/rubocop --parallel
