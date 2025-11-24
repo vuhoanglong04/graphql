@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module GraphqlHelpers
   def execute_graphql(query:, variables: {}, context: {})
     GraphqlSchema.execute(

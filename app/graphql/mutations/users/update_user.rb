@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Mutations
   module Users
     class UpdateUser < GraphQL::Schema::Mutation
@@ -15,7 +17,7 @@ module Mutations
         if user.update(attrs.compact)
           { user: user, errors: [] }
         else
-          { user: nil, errors: ["User not found"] }
+          { user: nil, errors: ['User not found'] }
         end
       end
     end
